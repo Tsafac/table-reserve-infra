@@ -17,8 +17,10 @@ variable "security_group_ids" {
   description = "Liste des groupes de sécurité associés à l'ALB"
   type        = list(string)
 }
-
 variable "default_tags" {
-  description = "Tags à appliquer sur toutes les ressources"
+  description = "Map de tags communs"
   type        = map(string)
 }
+
+
+

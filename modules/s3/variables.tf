@@ -12,3 +12,4 @@ variable "oac_policy_json" {
   description = "Politique bucket pour autoriser CloudFront via OAC"
   type        = string
 }
+

@@ -14,3 +14,15 @@ variable "environment" {
   type        = string
   default     = "production"
 }
+
+variable "domain_name" {
+  type        = string
+  description = "Nom de domaine principal"
+}
+
+variable "default_tags" {
+  type        = map(string)
+  description = "Tags communs à toutes les ressources"
+}
+
+

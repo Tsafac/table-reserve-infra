@@ -1,13 +1,20 @@
 # 1. Réseaux
 module "vpc" {
-  source        = "./modules/vpc"
-  project       = var.project
-  domain_name   = var.domain_name
-  default_tags  = var.default_tags
+  source             = "../modules/vpc"
+  vpc1_cidr_block    = var.vpc1_cidr_block
+  vpc2_cidr_block    = var.vpc2_cidr_block
+  public_subnet_1    = var.public_subnet_1
+  public_subnet_2    = var.public_subnet_2
+  private_subnet_1   = var.private_subnet_1
+  private_subnet_2   = var.private_subnet_2
+  availability_zone  = var.availability_zone
+  name_prefix        = var.name_prefix
+  default_tags       = var.default_tags
 }
 
+
 module "vpc_peering" {
-  source                 = "./modules/vpc_peering"
+  source                 = "../modules/vpc-peering"
   vpc1_id                = module.vpc.vpc_1_id
   vpc2_id                = module.vpc.vpc_2_id
   vpc1_route_table_id    = module.vpc.vpc_1_route_table_id
@@ -19,29 +26,31 @@ module "vpc_peering" {
 
 # 2. Sécurité
 module "sg" {
-  source        = "./modules/sg"
-  project       = var.project
-  domain_name   = var.domain_name
-  default_tags  = var.default_tags
-  # autres variables (cidr SSH, etc.)
+  source             = "../modules/sg"
+  name_prefix        = var.name_prefix
+  default_tags       = var.default_tags
+  domain_name        = var.domain_name
+  vpc_id             = module.vpc.vpc_2_id
+  authorized_cidr    = ["192.168.1.0/24", "10.0.0.0/16"]  # Exemple IP autorisées SSH
 }
 
+
 module "iam" {
-  source        = "./modules/iam"
+  source        = "../modules/iam"
   project       = var.project
   domain_name   = var.domain_name
   default_tags  = var.default_tags
+  aurora_secret_arn = module.aurora.aurora_secret_arn
 }
 
 module "kms" {
-  source        = "./modules/kms"
-  project       = var.project
+  source        = "../modules/kms"
   domain_name   = var.domain_name
   default_tags  = var.default_tags
 }
 
 module "security" {
-  source                   = "./modules/security"
+  source                   = "../modules/security"
   project                  = var.project
   domain_name              = var.domain_name
   default_tags             = var.default_tags
@@ -51,17 +60,25 @@ module "security" {
 
 # 3. Backend (Base de données + Fargate)
 module "aurora" {
-  source                = "./modules/aurora"
-  project               = var.project
-  domain_name           = var.domain_name
-  default_tags          = var.default_tags
-  kms_key_arn           = module.kms.kms_key_arn
-  ecs_service_sg_id     = module.sg.fargate_sg_id
-  # autres variables...
+  source              = "../modules/aurora"
+  name_prefix         = var.name_prefix
+  db_username         = "admin"
+  db_password         = var.db_password
+  db_name             = "reservation_db"
+  db_instance_class   = "db.t3.medium"
+  ecs_service_sg_id   = module.sg.fargate_sg_id
+  kms_key_arn         = module.kms.kms_key_arn
+  aurora_sg_id        = module.sg.aurora_sg_id
+  domain_name         = var.domain_name
+  default_tags        = var.default_tags
+  aurora_subnet_ids   = [module.vpc.private_subnet_2]
+
 }
 
+
+
 module "ecr" {
-  source        = "./modules/ecr"
+  source        = "../modules/ecr"
   project       = var.project
   domain_name   = var.domain_name
   default_tags  = var.default_tags
@@ -69,22 +86,23 @@ module "ecr" {
 }
 
 module "ecs_fargate" {
-  source              = "./modules/ecs-fargate"
+  source              = "../modules/ecs-fargate"
   project             = var.project
   domain_name         = var.domain_name
   default_tags        = var.default_tags
   image_url           = "${module.ecr.repository_url}:latest"
   execution_role_arn  = module.iam.ecs_execution_role_arn
   task_role_arn       = module.iam.task_role_arn
-  aurora_secret_arn   = module.aurora.secret_arn
+  aurora_secret_arn = module.aurora.aurora_secret_arn
   private_subnets     = module.vpc.private_subnets
   service_sg_id       = module.sg.fargate_sg_id
   target_group_arn    = module.alb.target_group_arn
+  ecs_sg_id           = module.sg.ecs_sg_id
 }
 
 # 4. Authentification
 module "cognito" {
-  source                  = "./modules/cognito"
+  source                  = "../modules/cognito"
   project                 = var.project
   domain_name             = var.domain_name
   default_tags            = var.default_tags
@@ -96,55 +114,81 @@ module "cognito" {
 
 # 5. Communication temps réel
 module "websocket" {
-  source              = "./modules/websocket"
-  project             = var.project
-  domain_name         = var.domain_name
-  default_tags        = var.default_tags
-  integration_uri     = module.ecs_fargate.service_uri
-  websocket_sg_id     = module.sg.websocket_sg_id
+  source                  = "../modules/websocket"
+  project                 = var.project
+  domain_name             = var.domain_name
+  default_tags            = var.default_tags
+  integration_uri         = module.ecs_fargate.service_uri
+  websocket_domain_name   = "ws.${var.domain_name}"
+  websocket_cert_arn      = module.acm.cert_arn
 }
+
+
+
+# 6bis. Certificat ACM 
+module "acm" {
+  source              = "../modules/acm"
+  domain_name_backend = var.domain_name_backend
+  domain_name  = var.domain_name 
+  hosted_zone_id      = var.hosted_zone_id
+  providers = {
+    aws = aws.us_east_1
+  }
+  tags                = var.default_tags
+}
+
+
 
 # 6. Frontend + Accès
 module "s3" {
-  source        = "./modules/s3"
-  project       = var.project
-  domain_name   = var.domain_name
-  default_tags  = var.default_tags
+  source             = "../modules/s3"
+  name_prefix        = var.name_prefix
+  oac_policy_json    = data.aws_iam_policy_document.oac_policy.json
+  default_tags       = var.default_tags
 }
 
+
 module "alb" {
-  source              = "./modules/alb"
-  project             = var.project
-  domain_name         = var.domain_name
-  default_tags        = var.default_tags
+  source              = "../modules/alb"
+  name_prefix         = var.name_prefix
   vpc_id              = module.vpc.vpc_2_id
   public_subnets      = module.vpc.public_subnets
   security_group_ids  = [module.sg.alb_sg_id]
+  default_tags        = var.default_tags
 }
 
 module "cloudfront" {
-  source           = "./modules/cloudfront"
-  project          = var.project
-  domain_name      = var.domain_name
-  default_tags     = var.default_tags
-  alb_dns_name     = module.alb.alb_dns_name
-  waf_acl_arn      = module.waf.waf_acl_arn
-  acm_cert_arn     = module.acm.cert_arn
+  source                  = "../modules/cloudfront"
+
+  alb_dns_name            = module.alb.alb_dns_name
+  acm_cert_arn            = module.acm.cert_arn
+  cloudfront_logs_bucket  = module.s3.logs_bucket_name
+  cloudfront_domain_name  = "www.${var.domain_name}"
+
+  project                 = var.project
+  tags                    = var.default_tags
+  domain_name             = var.domain_name  
 }
 
+
+
 module "route53" {
-  source            = "./modules/route53"
-  project           = var.project
-  domain_name       = var.domain_name
-  default_tags      = var.default_tags
-  zone_name         = var.zone_name
-  alb_dns_name      = module.alb.alb_dns_name
-  alb_dns_zone_id   = module.alb.alb_zone_id
+  source                  = "../modules/Route53"
+  project                 = var.project
+  domain_name             = var.domain_name
+  default_tags            = var.default_tags
+  zone_name               = var.zone_name
+  alb_dns_name            = module.alb.alb_dns_name
+  alb_dns_zone_id         = module.alb.alb_zone_id
+  websocket_domain_target = module.websocket.websocket_domain_target
+  websocket_zone_id       = module.websocket.websocket_zone_id
 }
+
+
 
 # 7. Sécurité web
 module "waf" {
-  source        = "./modules/waf"
+  source        = "../modules/waf"
   project       = var.project
   domain_name   = var.domain_name
   default_tags  = var.default_tags
@@ -153,7 +197,7 @@ module "waf" {
 
 # 8. Observabilité
 module "cloudwatch" {
-  source               = "./modules/cloudwatch"
+  source               = "../modules/cloudwatch"
   project              = var.project
   domain_name          = var.domain_name
   default_tags         = var.default_tags

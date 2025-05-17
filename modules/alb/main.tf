@@ -5,7 +5,9 @@ resource "aws_lb" "this" {
   security_groups    = var.security_group_ids
   subnets            = var.public_subnets
 
-  tags = var.default_tags
+  tags = merge(var.tags, {
+    Name = var.domain_name
+  })
 }
 
 resource "aws_lb_target_group" "frontend" {
@@ -24,7 +26,9 @@ resource "aws_lb_target_group" "frontend" {
     unhealthy_threshold = 2
   }
 
-  tags = var.default_tags
+  tags = merge(var.tags, {
+    Name = var.domain_name
+  })
 }
 
 resource "aws_lb_listener" "http" {

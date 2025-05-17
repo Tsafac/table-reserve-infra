@@ -7,47 +7,18 @@ resource "aws_apigatewayv2_api" "websocket_api" {
     Name = var.domain_name
   })
 }
-
-resource "aws_apigatewayv2_integration" "connect" {
+resource "aws_apigatewayv2_integration" "websocket_integration" {
   api_id                 = aws_apigatewayv2_api.websocket_api.id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = var.lambda_connect_arn
+  integration_type       = "HTTP_PROXY"
+  integration_uri        = var.integration_uri 
   integration_method     = "POST"
   payload_format_version = "2.0"
 }
 
-resource "aws_apigatewayv2_integration" "disconnect" {
-  api_id                 = aws_apigatewayv2_api.websocket_api.id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = var.lambda_disconnect_arn
-  integration_method     = "POST"
-  payload_format_version = "2.0"
-}
-
-resource "aws_apigatewayv2_integration" "send" {
-  api_id                 = aws_apigatewayv2_api.websocket_api.id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = var.lambda_send_arn
-  integration_method     = "POST"
-  payload_format_version = "2.0"
-}
-
-resource "aws_apigatewayv2_route" "connect" {
+resource "aws_apigatewayv2_route" "default_route" {
   api_id    = aws_apigatewayv2_api.websocket_api.id
-  route_key = "$connect"
-  target    = "integrations/${aws_apigatewayv2_integration.connect.id}"
-}
-
-resource "aws_apigatewayv2_route" "disconnect" {
-  api_id    = aws_apigatewayv2_api.websocket_api.id
-  route_key = "$disconnect"
-  target    = "integrations/${aws_apigatewayv2_integration.disconnect.id}"
-}
-
-resource "aws_apigatewayv2_route" "send_message" {
-  api_id    = aws_apigatewayv2_api.websocket_api.id
-  route_key = "sendMessage"
-  target    = "integrations/${aws_apigatewayv2_integration.send.id}"
+  route_key = "$default"
+  target    = "integrations/${aws_apigatewayv2_integration.websocket_integration.id}"
 }
 
 resource "aws_apigatewayv2_stage" "websocket_stage" {

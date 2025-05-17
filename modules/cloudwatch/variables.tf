@@ -33,3 +33,4 @@ variable "waf_metric_name" {
   description = "Nom du WAF WebACL pour CloudWatch"
   type        = string
 }
+

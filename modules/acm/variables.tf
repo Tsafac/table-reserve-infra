@@ -36,3 +36,10 @@ variable "environment" {
   type        = string
   default     = "production"
 }
+
+variable "tags" {
+  description = "Common tags for resources"
+  type        = map(string)
+}
+
+

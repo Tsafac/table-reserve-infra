@@ -83,3 +83,48 @@ variable "budget_notification_email" {
   type        = string
 }
 
+variable "public_subnet_1" {
+  description = "CIDR du subnet public dans VPC 1"
+  type        = string
+}
+
+variable "public_subnet_2" {
+  description = "CIDR du subnet public dans VPC 2"
+  type        = string
+}
+
+variable "private_subnet_1" {
+  description = "CIDR du subnet privé 1 dans VPC 2"
+  type        = string
+}
+
+variable "private_subnet_2" {
+  description = "CIDR du subnet privé 2 dans VPC 2"
+  type        = string
+}
+
+variable "availability_zone" {
+  description = "Zone de disponibilité utilisée pour les subnets"
+  type        = string
+}
+
+variable "db_password" {
+  description = "Mot de passe du super utilisateur de la base Aurora"
+  type        = string
+}
+
+variable "domain_name_backend" {
+  description = "Nom de domaine backend pour le certificat ACM"
+  type        = string
+}
+
+variable "hosted_zone_id" {
+  description = "ID de la zone hébergée dans Route 53"
+  type        = string
+}
+
+variable "integration_uri" {
+  description = "URI HTTP intégré à l'API WebSocket"
+  type        = string
+}
+

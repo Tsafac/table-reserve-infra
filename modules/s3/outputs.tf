@@ -17,3 +17,13 @@ output "s3_block_public_access_config" {
     restrict_public_buckets = aws_s3_bucket_public_access_block.example.restrict_public_buckets
   }
 }
+
+output "cf_logs_bucket_arn" {
+  description = "ARN du bucket de logs CloudFront"
+  value       = aws_s3_bucket.cf_logs.arn
+}
+
+output "frontend_bucket_arn" {
+  description = "ARN du bucket principal"
+  value       = aws_s3_bucket.frontend.arn
+}

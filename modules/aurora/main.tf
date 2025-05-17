@@ -1,7 +1,7 @@
 # Subnet group Aurora (private-2)
 resource "aws_db_subnet_group" "aurora_subnet_group" {
+  subnet_ids = var.aurora_subnet_ids
   name       = "${var.name_prefix}-aurora-subnet-group"
-  subnet_ids = [aws_subnet.private-2.id]
 
   tags = merge(var.default_tags, {
     Name = var.domain_name
@@ -18,6 +18,8 @@ resource "aws_secretsmanager_secret" "aurora_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "aurora_secret_version" {
+  depends_on = [aws_rds_cluster.aurora]
+
   secret_id     = aws_secretsmanager_secret.aurora_secret.id
   secret_string = jsonencode({
     username = var.db_username
@@ -27,6 +29,7 @@ resource "aws_secretsmanager_secret_version" "aurora_secret_version" {
     dbname   = var.db_name
   })
 }
+
 
 # Cluster Aurora PostgreSQL (chiffré avec KMS, SG via module)
 resource "aws_rds_cluster" "aurora" {
@@ -47,8 +50,6 @@ resource "aws_rds_cluster" "aurora" {
   tags = merge(var.default_tags, {
     Name = var.domain_name
   })
-
-  depends_on = [aws_secretsmanager_secret_version.aurora_secret_version]
 }
 
 resource "aws_rds_cluster_instance" "aurora_instance" {

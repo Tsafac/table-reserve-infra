@@ -1,5 +1,9 @@
 resource "aws_ecs_cluster" "main" {
   name = "${var.project}-cluster"
+
+   tags = merge(var.default_tags, {
+    Name = "${var.domain_name}-cluster"
+  })
 }
 
 resource "aws_ecs_task_definition" "app" {
@@ -67,7 +71,7 @@ resource "aws_ecs_service" "app" {
 
   network_configuration {
     subnets          = var.private_subnets
-    security_groups  = [var.service_sg_id]
+    security_groups = [var.ecs_sg_id]
     assign_public_ip = false
   }
 
@@ -78,4 +82,8 @@ resource "aws_ecs_service" "app" {
   }
 
   depends_on = [aws_lb_listener.https]
+
+  tags = merge(var.default_tags, {
+    Name = "${var.domain_name}-cluster"
+  })
 }

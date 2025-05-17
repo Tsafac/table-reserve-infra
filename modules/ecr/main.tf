@@ -7,8 +7,7 @@ resource "aws_ecr_repository" "app" {
     scan_on_push = true
   }
 
-  tags = {
-    Project     = var.project
-    Environment = var.environment
-  }
+  tags = merge(var.default_tags, {
+    Name = var.domain_name
+  })
 }

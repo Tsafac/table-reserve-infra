@@ -38,3 +38,15 @@ resource "aws_s3_bucket_policy" "frontend_policy" {
 
   policy = var.oac_policy_json
 }
+
+data "aws_iam_policy_document" "oac_policy" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["arn:aws:s3:::your-bucket-name/*"]
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+  }
+}
+

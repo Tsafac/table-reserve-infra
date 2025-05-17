@@ -1,41 +1,41 @@
+# SG pour Aurora
 resource "aws_security_group" "aurora_sg" {
-  name        = "aurora-sg"
-  description = "Permet les connexions PostgreSQL depuis Fargate"
-  vpc_id      = aws_vpc.vpc-2.id
+  name        = "${var.name_prefix}-aurora-sg"
+  description = "Permet les connexions PostgreSQL depuis ECS Fargate"
+  vpc_id      = var.vpc_id
 
   ingress {
-    description      = "PostgreSQL depuis ECS Fargate"
-    from_port        = 5432
-    to_port          = 5432
-    protocol         = "tcp"
-    security_groups  = [var.ecs_service_sg_id]
+    description     = "PostgreSQL depuis ECS Fargate"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_sg.id]  
   }
 
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = merge(var.default_tags, {
-    Name = var.domain_name
+    Name = "${var.domain_name}-aurora-sg"
   })
 }
- 
 
- # SG pour le bastion host
+# SG pour le Bastion
 resource "aws_security_group" "bastion_sg" {
-  name        = "${var.project}-bastion-sg"
-  description = "Security group for Bastion host"
+  name        = "${var.name_prefix}-bastion-sg"
+  description = "Accès SSH limité pour le bastion host"
   vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.authorized_cidr]
-    description = "SSH depuis IP autorisée"
+    cidr_blocks = var.authorized_cidr
+    description = "SSH depuis IP autorisées"
   }
 
   egress {
@@ -49,3 +49,29 @@ resource "aws_security_group" "bastion_sg" {
     Name = "${var.domain_name}-bastion-sg"
   })
 }
+
+# SG pour ECS
+resource "aws_security_group" "ecs_sg" {
+  name        = "${var.name_prefix}-ecs-sg"
+  description = "SG pour ECS Fargate"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.default_tags, {
+    Name = "${var.domain_name}-ecs-sg"
+  })
+}
+

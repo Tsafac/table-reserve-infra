@@ -18,17 +18,4 @@ variable "aurora_secret_arn" {
   type        = string
 }
 
-variable "project" {
-  description = "Nom du projet"
-  type        = string
-}
 
-variable "domain_name" {
-  description = "Nom logique pour les tags"
-  type        = string
-}
-
-variable "default_tags" {
-  description = "Map de tags globaux"
-  type        = map(string)
-}

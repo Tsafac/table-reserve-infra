@@ -32,3 +32,5 @@ variable "cognito_domain_prefix" {
   description = "Préfixe de domaine Cognito (ex: reservation-app)"
   type        = string
 }
+
+

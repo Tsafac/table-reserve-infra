@@ -45,3 +45,19 @@ variable "aurora_secret_arn" {
   type        = string
 }
 
+variable "domain_name" {
+  type        = string
+  description = "Nom de domaine du projet (pour taggage)"
+}
+
+variable "default_tags" {
+  type        = map(string)
+  description = "Tags communs à appliquer"
+}
+
+variable "ecs_sg_id" {
+  description = "ID du SG utilisé pour ECS"
+  type        = string
+}
+
+

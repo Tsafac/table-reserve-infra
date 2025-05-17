@@ -32,3 +32,4 @@ variable "default_tags" {
   description = "Tags globaux à appliquer"
   type        = map(string)
 }
+

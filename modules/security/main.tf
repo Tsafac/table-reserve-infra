@@ -82,29 +82,32 @@ resource "aws_budgets_budget" "monthly" {
   name              = "${var.project}-monthly-budget"
   budget_type       = "COST"
   time_unit         = "MONTHLY"
+
   limit_amount      = var.budget_limit
   limit_unit        = "USD"
 
-  cost_filters = {
-    Service = "Amazon Elastic Compute Cloud - Compute"
-  }
-
   time_period_start = "2024-01-01_00:00"
   time_period_end   = "2087-01-01_00:00"
+
+  cost_filter {
+    name = "Service"
+    values = ["Amazon Elastic Compute Cloud - Compute"]
+  }
 
   notification {
     comparison_operator = "GREATER_THAN"
     threshold           = 80
     threshold_type      = "PERCENTAGE"
     notification_type   = "ACTUAL"
+  }
 
-    subscriber {
-      subscription_type = "EMAIL"
-      address           = var.budget_notification_email
-    }
+  subscriber {
+    address           = var.budget_notification_email
+    subscription_type = "EMAIL"
   }
 
   tags = merge(var.default_tags, {
     Name = "${var.domain_name}-budget"
   })
 }
+

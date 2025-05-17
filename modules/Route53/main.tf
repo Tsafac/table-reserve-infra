@@ -15,17 +15,26 @@ resource "aws_route53_record" "www" {
     zone_id                = var.alb_dns_zone_id
     evaluate_target_health = true
   }
+  tags = merge(var.default_tags, {
+    Name = "${var.project}-www"
+  })
 }
 
 # Enregistrement "ws" pour WebSocket (API Gateway)
+
 resource "aws_route53_record" "websocket" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = "ws.${var.zone_name}"
   type    = "A"
 
   alias {
-    name                   = aws_apigatewayv2_domain_name.websocket_domain.domain_name_configuration[0].target_domain_name
-    zone_id                = aws_apigatewayv2_domain_name.websocket_domain.domain_name_configuration[0].hosted_zone_id
+    name                   = var.websocket_domain_target
+    zone_id                = var.websocket_zone_id
     evaluate_target_health = true
   }
+
+  tags = merge(var.default_tags, {
+    Name = "${var.project}-ws"
+  })
 }
+

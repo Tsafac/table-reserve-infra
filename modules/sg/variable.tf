@@ -1,45 +1,27 @@
-variable "ecs_service_sg_id" {
-  description = "ID du Security Group ECS autorisé à accéder à Aurora"
+variable "vpc_id" {
   type        = string
-}
-
-variable "domain_name" {
-  description = "Nom logique utilisé dans le tag Name"
-  type        = string
-}
-
-variable "default_tags" {
-  description = "Tags globaux à appliquer à toutes les ressources"
-  type        = map(string)
-}
- 
-
- variable "vpc_id" {
-  description = "ID du VPC"
-  type        = string
+  description = "ID du VPC où créer les SG"
 }
 
 variable "authorized_cidr" {
-  description = "IP publique autorisée pour SSH (ex: X.X.X.X/32)"
-  type        = string
+  type        = list(string)
+  description = "Liste des CIDR autorisés à accéder en SSH (bastion)"
 }
 
 variable "default_tags" {
-  description = "Tags globaux"
   type        = map(string)
+  description = "Tags communs"
 }
 
 variable "domain_name" {
-  description = "Nom logique pour les tags"
   type        = string
+  description = "Nom de domaine du projet (pour tag)"
 }
 
-variable "project" {
-  description = "Nom du projet"
+variable "name_prefix" {
   type        = string
+  description = "Préfixe pour nommer les ressources SG"
 }
 
-output "bastion_sg_id" {
-  description = "ID du Security Group de la Bastion"
-  value       = aws_security_group.bastion_sg.id
-}
+
+
