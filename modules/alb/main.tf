@@ -5,7 +5,7 @@ resource "aws_lb" "this" {
   security_groups    = var.security_group_ids
   subnets            = var.public_subnets
 
-  tags = merge(var.tags, {
+  tags = merge(var.default_tags, {
     Name = var.domain_name
   })
 }
@@ -26,7 +26,7 @@ resource "aws_lb_target_group" "frontend" {
     unhealthy_threshold = 2
   }
 
-  tags = merge(var.tags, {
+ tags = merge(var.default_tags, {
     Name = var.domain_name
   })
 }
@@ -52,7 +52,7 @@ resource "aws_lb_listener" "https" {
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
-  certificate_arn   = aws_acm_certificate.regional_cert.arn
+  certificate_arn   = var.certificate_arn
 
   default_action {
     type             = "forward"

@@ -25,21 +25,10 @@ variable "alternate_names_backend" {
   default     = []
 }
 
-variable "project" {
-  description = "Nom du projet"
-  type        = string
-  default     = "reservation-app"
-}
-
-variable "environment" {
-  description = "Environnement (dev, staging, prod)"
-  type        = string
-  default     = "production"
-}
-
-variable "tags" {
-  description = "Common tags for resources"
+variable "default_tags" {
+  description = "Map de tags communs"
   type        = map(string)
 }
+
 
 

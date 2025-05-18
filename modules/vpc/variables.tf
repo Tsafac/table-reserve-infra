@@ -1,46 +1,45 @@
 variable "vpc1_cidr_block" {
+  description = "CIDR block for VPC 1"
   type        = string
-  description = "CIDR block pour le VPC 1 (public)"
 }
 
 variable "vpc2_cidr_block" {
+  description = "CIDR block for VPC 2"
   type        = string
-  description = "CIDR block pour le VPC 2 (privé)"
 }
 
 variable "public_subnet_1" {
+  description = "CIDR block for public subnet 1"
   type        = string
-  description = "CIDR block du subnet public 1"
 }
 
 variable "public_subnet_2" {
+  description = "CIDR block for public subnet 2"
   type        = string
-  description = "CIDR block du subnet public 2"
 }
 
 variable "private_subnet_1" {
+  description = "CIDR block for private subnet 1"
   type        = string
-  description = "CIDR block du subnet privé 1"
 }
 
 variable "private_subnet_2" {
+  description = "CIDR block for private subnet 2"
   type        = string
-  description = "CIDR block du subnet privé 2"
 }
 
 variable "availability_zone" {
+  description = "Availability zone to use for subnets"
   type        = string
-  description = "Zone de disponibilité AWS (ex: eu-west-3a)"
 }
 
 variable "name_prefix" {
+  description = "Prefix to apply to resource names"
   type        = string
-  description = "Préfixe pour nommer les ressources"
 }
 
 variable "default_tags" {
+  description = "Default tags to apply to resources"
   type        = map(string)
-  description = "Tags communs à toutes les ressources"
 }
-
 

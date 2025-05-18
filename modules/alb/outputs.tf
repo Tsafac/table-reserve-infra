@@ -1,19 +1,25 @@
+output "metric_name" {
+  description = "Nom du Load Balancer (CloudWatch)"
+  value       = aws_lb.this.name
+}
+
 output "alb_dns_name" {
-  description = "Nom DNS public de l'ALB"
+  description = "Nom DNS du Load Balancer"
   value       = aws_lb.this.dns_name
 }
 
+output "alb_zone_id" {
+  description = "Zone ID du Load Balancer (pour Route53 alias)"
+  value       = aws_lb.this.zone_id
+}
+
 output "alb_arn" {
-  description = "ARN complet de l'ALB"
+  description = "ARN du Load Balancer"
   value       = aws_lb.this.arn
 }
 
-output "alb_listener_https_arn" {
-  description = "ARN du listener HTTPS de l'ALB"
-  value       = aws_lb_listener.https.arn
-}
-
-output "alb_target_group_arn" {
-  description = "ARN du target group principal (frontend)"
+output "target_group_arn" {
+  description = "ARN du Target Group"
   value       = aws_lb_target_group.frontend.arn
 }
+

@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "app" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
-  execution_role_arn = module.iam.ecs_execution_role_arn
+  execution_role_arn = var.execution_role_arn
   task_role_arn            = var.task_role_arn
 
   container_definitions = jsonencode([
@@ -80,8 +80,6 @@ resource "aws_ecs_service" "app" {
     container_name   = "app"
     container_port   = 80
   }
-
-  depends_on = [aws_lb_listener.https]
 
   tags = merge(var.default_tags, {
     Name = "${var.domain_name}-cluster"

@@ -42,31 +42,22 @@ resource "aws_s3_bucket_policy" "trail_policy" {
 
 data "aws_iam_policy_document" "trail" {
   statement {
-    actions = ["s3:GetBucketAcl"]
-    resources = [aws_s3_bucket.trail_logs.arn]
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudtrail.amazonaws.com"]
-    }
-  }
-
-  statement {
-    actions = ["s3:PutObject"]
-    resources = ["${aws_s3_bucket.trail_logs.arn}/*"]
+    actions   = ["s3:GetObject"]
+    resources = ["arn:aws:s3:::bucket/*"]
 
     principals {
       type        = "Service"
       identifiers = ["cloudtrail.amazonaws.com"]
     }
 
-    conditions = {
-      StringEquals = {
-        "s3:x-amz-acl" = "bucket-owner-full-control"
-      }
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values   = ["bucket-owner-full-control"]
     }
   }
 }
+
 
 # GuardDuty
 resource "aws_guardduty_detector" "main" {
@@ -79,35 +70,33 @@ resource "aws_guardduty_detector" "main" {
 
 #AWS Budgets
 resource "aws_budgets_budget" "monthly" {
-  name              = "${var.project}-monthly-budget"
-  budget_type       = "COST"
-  time_unit         = "MONTHLY"
+  name         = "${var.project}-monthly-budget"
+  budget_type  = "COST"
+  time_unit    = "MONTHLY"
 
-  limit_amount      = var.budget_limit
-  limit_unit        = "USD"
+  limit_amount = var.budget_limit
+  limit_unit   = "USD"
 
   time_period_start = "2024-01-01_00:00"
   time_period_end   = "2087-01-01_00:00"
 
   cost_filter {
-    name = "Service"
+    name   = "Service"
     values = ["Amazon Elastic Compute Cloud - Compute"]
   }
 
   notification {
-    comparison_operator = "GREATER_THAN"
-    threshold           = 80
-    threshold_type      = "PERCENTAGE"
-    notification_type   = "ACTUAL"
-  }
-
-  subscriber {
-    address           = var.budget_notification_email
-    subscription_type = "EMAIL"
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [var.budget_notification_email]
   }
 
   tags = merge(var.default_tags, {
     Name = "${var.domain_name}-budget"
   })
 }
+
+
 

@@ -15,9 +15,7 @@ resource "aws_route53_record" "www" {
     zone_id                = var.alb_dns_zone_id
     evaluate_target_health = true
   }
-  tags = merge(var.default_tags, {
-    Name = "${var.project}-www"
-  })
+   
 }
 
 # Enregistrement "ws" pour WebSocket (API Gateway)
@@ -33,8 +31,6 @@ resource "aws_route53_record" "websocket" {
     evaluate_target_health = true
   }
 
-  tags = merge(var.default_tags, {
-    Name = "${var.project}-ws"
-  })
+  
 }
 

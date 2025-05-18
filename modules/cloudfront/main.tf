@@ -60,7 +60,8 @@ resource "aws_cloudfront_distribution" "alb_distribution" {
     minimum_protocol_version = "TLSv1.2_2021"
   }
 
-  tags = merge(var.tags, {
-    Name = var.domain_name
-  })
+  tags = merge(var.default_tags, {
+  Name = var.domain_name
+})
+
 }

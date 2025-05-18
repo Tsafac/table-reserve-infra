@@ -1,26 +1,26 @@
-variable "vpc_id" {
+variable "name_prefix" {
+  description = "Préfixe utilisé pour nommer les Security Groups"
   type        = string
-  description = "ID du VPC où créer les SG"
 }
 
-variable "authorized_cidr" {
-  type        = list(string)
-  description = "Liste des CIDR autorisés à accéder en SSH (bastion)"
+variable "vpc_id" {
+  description = "ID du VPC dans lequel les SG seront créés"
+  type        = string
 }
 
 variable "default_tags" {
+  description = "Map de tags à appliquer à toutes les ressources"
   type        = map(string)
-  description = "Tags communs"
 }
 
 variable "domain_name" {
+  description = "Nom de domaine utilisé dans les tags des ressources"
   type        = string
-  description = "Nom de domaine du projet (pour tag)"
 }
 
-variable "name_prefix" {
-  type        = string
-  description = "Préfixe pour nommer les ressources SG"
+variable "authorized_cidr" {
+  description = "Liste des CIDR autorisées pour l'accès SSH au bastion"
+  type        = list(string)
 }
 
 

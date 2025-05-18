@@ -34,6 +34,17 @@ module "sg" {
   authorized_cidr    = ["192.168.1.0/24", "10.0.0.0/16"]  # Exemple IP autorisées SSH
 }
 
+module "bastion" {
+  source           = "../modules/bastion"
+  ami_id           = var.bastion_ami_id
+  instance_type    = var.bastion_instance_type
+  subnet_id        = module.vpc.public_subnet_1
+  bastion_sg_id    = module.sg.bastion_sg_id
+  key_name         = var.key_name
+  domain_name      = var.domain_name
+  default_tags     = var.default_tags
+}
+
 
 module "iam" {
   source        = "../modules/iam"
@@ -44,6 +55,7 @@ module "iam" {
 }
 
 module "kms" {
+  project       = var.project
   source        = "../modules/kms"
   domain_name   = var.domain_name
   default_tags  = var.default_tags
@@ -66,14 +78,13 @@ module "aurora" {
   db_password         = var.db_password
   db_name             = "reservation_db"
   db_instance_class   = "db.t3.medium"
-  ecs_service_sg_id   = module.sg.fargate_sg_id
-  kms_key_arn         = module.kms.kms_key_arn
   aurora_sg_id        = module.sg.aurora_sg_id
+  kms_key_id          = module.kms.kms_key_id              
   domain_name         = var.domain_name
   default_tags        = var.default_tags
   aurora_subnet_ids   = [module.vpc.private_subnet_2]
-
 }
+
 
 
 
@@ -98,6 +109,7 @@ module "ecs_fargate" {
   service_sg_id       = module.sg.fargate_sg_id
   target_group_arn    = module.alb.target_group_arn
   ecs_sg_id           = module.sg.ecs_sg_id
+  environment         = var.environment 
 }
 
 # 4. Authentification
@@ -109,7 +121,7 @@ module "cognito" {
   callback_urls           = var.callback_urls
   logout_urls             = var.logout_urls
   cognito_domain_prefix   = var.cognito_domain_prefix
-  environment             = var.environment
+  aws_region              = var.aws_region 
 }
 
 # 5. Communication temps réel
@@ -128,14 +140,17 @@ module "websocket" {
 # 6bis. Certificat ACM 
 module "acm" {
   source              = "../modules/acm"
+  domain_name         = var.domain_name
+  alternate_names     = var.alternate_names          
   domain_name_backend = var.domain_name_backend
-  domain_name  = var.domain_name 
+  alternate_names_backend = var.alternate_names_backend 
   hosted_zone_id      = var.hosted_zone_id
+  default_tags        = var.default_tags
   providers = {
     aws = aws.us_east_1
   }
-  tags                = var.default_tags
 }
+
 
 
 
@@ -155,7 +170,10 @@ module "alb" {
   public_subnets      = module.vpc.public_subnets
   security_group_ids  = [module.sg.alb_sg_id]
   default_tags        = var.default_tags
+  certificate_arn     = module.acm.regional_cert_arn   
+  domain_name         = var.domain_name                
 }
+
 
 module "cloudfront" {
   source                  = "../modules/cloudfront"
@@ -166,7 +184,7 @@ module "cloudfront" {
   cloudfront_domain_name  = "www.${var.domain_name}"
 
   project                 = var.project
-  tags                    = var.default_tags
+  default_tags            = var.default_tags
   domain_name             = var.domain_name  
 }
 

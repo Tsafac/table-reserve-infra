@@ -1,48 +1,92 @@
-# 🛠️ Projet Terraform : Unify Infrastructure (AWS)
+# 📦 Projet Terraform – Infrastructure AWS pour Application de Réservation
 
-Ce projet provisionne une architecture complète sur AWS pour une application web moderne, avec sécurité, scalabilité, CI/CD, et monitoring intégré.
+## ✨ Objectif
+Ce projet met en place une infrastructure cloud complète et modulaire sur AWS pour une application de réservation. Elle est décrite à l'aide de Terraform, selon une architecture multi-AZ et conforme aux bonnes pratiques DevOps.
 
----
+## 🗂️ Arborescence du projet
 
-## 📦 Modules inclus
+```
+TABLE-RESERVE-INFRA/
+├── modules/                        # Modules Terraform réutilisables
+│   ├── acm                         # Certificats ACM (frontend/backend)
+│   ├── alb                         # Load Balancer HTTP/HTTPS
+│   ├── aurora                      # Cluster RDS Aurora PostgreSQL
+│   ├── bastion                     # EC2 Bastion host pour accès SSH
+│   ├── cloudfront                  # CDN pour le frontend
+│   ├── cloudwatch                  # Logs ECS et métriques CloudWatch
+│   ├── cognito                     # Authentification utilisateur
+│   ├── ecr                         # Registry pour les images Docker
+│   ├── ecs-fargate                 # Déploiement backend via ECS Fargate
+│   ├── iam                         # Rôles IAM nécessaires
+│   ├── kms                         # Clés de chiffrement (optionnel)
+│   ├── Route53                     # Enregistrements DNS
+│   ├── s3                          # Buckets S3 (frontend et logs)
+│   ├── security                    # CloudTrail, GuardDuty, Budget
+│   ├── sg                          # Security Groups (ECS, Bastion, ALB...)
+│   ├── vpc                         # Création des VPCs publics/privés
+│   ├── vpc-peering                 # Peering entre VPC 1 et VPC 2
+│   ├── waf                         # Web Application Firewall (CloudFront)
+│   └── websocket                   # API Gateway WebSocket
+│
+├── project-root/
+│   ├── main.tf                     # Composition globale (appel modules)
+│   ├── variables.tf                # Variables globales
+│   ├── outputs.tf                  # Valeurs exportées
+│   ├── provider.tf                 # Configuration AWS (multi-region)
+│   ├── terraform.tfvars            # Valeurs concrètes des variables
+│   ├── terraform.lock.hcl          # Lockfile provider
+│   ├── tfplan                      # Plan terraform (binaire)
+│   └── README.md                   # Ce fichier
+```
 
-| Module           | Description |
-|------------------|-------------|
-| `vpc`            | Crée deux VPC : public (`vpc-1`) et privé (`vpc-2`), avec NAT, IGW, subnets |
-| `vpc_peering`    | Active le peering entre `vpc-1` et `vpc-2` |
-| `sg`             | Définit tous les groupes de sécurité : ALB, Fargate, Aurora, WebSocket, Bastion |
-| `kms`            | Clé KMS pour chiffrer Aurora et secrets |
-| `iam`            | Rôles pour ECS Fargate (task + execution), avec accès ECR, logs, secrets |
-| `ecr`            | Registre privé Docker pour l’image backend |
-| `ecs-fargate`    | Déploie le backend dans ECS Fargate (subnets privés) |
-| `aurora`         | Cluster Aurora PostgreSQL dans les subnets privés |
-| `cognito`        | Authentification utilisateur via Cognito (frontend web) |
-| `websocket`      | API Gateway WebSocket connecté au backend Fargate |
-| `alb`            | Application Load Balancer (HTTPS + redirection HTTP) |
-| `cloudfront`     | CDN sécurisé devant l’ALB |
-| `s3`             | Héberge le frontend statique + logs CloudFront |
-| `route53`        | DNS public pour le site (`zone_name`) |
-| `waf`            | Web Application Firewall (CloudFront + ALB) |
-| `cloudwatch`     | Logs ECS, alarmes sur Aurora, ALB, WAF, erreurs |
-| `security`       | Active CloudTrail, GuardDuty et AWS Budgets |
-| `bastion`        | Instance EC2 publique (SSH) pour administrer les ressources dans `vpc-2` |
+## ☁️ Stack AWS utilisée
 
----
+- **Amazon VPC** – Deux VPCs interconnectés (peering)
+- **ALB** – Pour l'exposition du backend (HTTPS)
+- **Amazon ECS (Fargate)** – Déploiement du backend
+- **Amazon Aurora** – Base de données PostgreSQL
+- **Amazon Cognito** – Authentification utilisateurs
+- **Amazon CloudFront + S3** – Distribution frontend statique
+- **Amazon WAF** – Protection contre attaques web courantes
+- **API Gateway WebSocket** – Communication temps réel
+- **IAM, CloudWatch, GuardDuty, Budgets** – Sécurité et monitoring
 
-## 🔧 Fichiers Terraform principaux
+## 🔐 Sécurité
 
-- `main.tf` → orchestre tous les modules
-- `variables.tf` → centralise les variables globales
-- `terraform.tfvars` → valeurs concrètes (ex: région, domaine, budget)
-- `outputs.tf` → expose les valeurs clés (ALB DNS, IP bastion, secrets, etc.)
+- Utilisation de `aws-vault` pour gérer les credentials AWS de façon sécurisée
+- Les rôles IAM sont strictement définis pour les services nécessaires
+- Sécurité réseau assurée par des SG bien cloisonnés et des subnets privés/publics
 
----
+## ⚠️ Problème volontaire sur Route53
 
-## ▶️ Déploiement
+L'erreur suivante apparaît lors du `terraform plan` :
 
-1. Configure ton profil AWS CLI (`~/.aws/credentials`)
-2. Clone le projet et initialise Terraform :
+```
+Error: no matching Route 53 Hosted Zone found
+```
+
+🎯 **Explication** :
+Le module `Route53` tente de rechercher une zone DNS (`data "aws_route53_zone"`) correspondant au domaine `"example.com"` mais celle-ci **n’a pas été créée dans AWS**.
+
+👉 Ce comportement est attendu et volontaire :
+- Pour les besoins du test, il n’était **pas requis de provisionner une vraie zone Route53**.
+- Il suffit de créer cette zone dans AWS ou de **commenter temporairement le module Route53** si non nécessaire.
+
+## 🚀 Déploiement (local avec `aws-vault`)
 
 ```bash
-terraform init
-terraform apply -var-file="terraform.tfvars"
+# Initialisation
+aws-vault exec unify -- terraform init
+
+# Vérification de la validité
+aws-vault exec unify -- terraform validate
+
+# Génération du plan (sans apply)
+aws-vault exec unify -- terraform plan -out=tfplan
+```
+
+## 📝 Auteur
+
+**Fabrice TSAFACK**  
+DevSecOps | Cloud | Sécurité | Terraform | Kubernetes  
+> `ronicefabrice@gmail.com

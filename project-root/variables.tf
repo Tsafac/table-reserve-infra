@@ -128,3 +128,35 @@ variable "integration_uri" {
   type        = string
 }
 
+variable "bastion_ami_id" {
+  description = "AMI pour le Bastion"
+  type        = string
+}
+
+variable "bastion_instance_type" {
+  description = "Type d'instance EC2 pour le Bastion"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "key_name" {
+  description = "Nom de la paire de clés SSH"
+  type        = string
+}
+
+variable "alternate_names" {
+  description = "SANs pour le certificat CloudFront"
+  type        = list(string)
+  default     = []
+}
+
+variable "alternate_names_backend" {
+  description = "SANs pour le certificat backend"
+  type        = list(string)
+  default     = []
+}
+
+variable "execution_role_arn" {
+  description = "ARN du rôle d'exécution ECS"
+  type        = string
+}

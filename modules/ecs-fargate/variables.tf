@@ -1,13 +1,51 @@
 variable "project" {
-  description = "Nom du projet"
+  description = "Nom du projet (préfixe pour les ressources)"
   type        = string
-  default     = "reservation-app"
+}
+
+variable "domain_name" {
+  description = "Nom de domaine utilisé dans les tags"
+  type        = string
+}
+
+variable "default_tags" {
+  description = "Tags communs à toutes les ressources"
+  type        = map(string)
+}
+
+variable "image_url" {
+  description = "Image Docker à déployer sur ECS"
+  type        = string
 }
 
 variable "environment" {
-  description = "Nom de l'environnement (dev, staging, prod)"
+  description = "Nom de l'environnement (ex: dev, staging, prod)"
   type        = string
-  default     = "production"
+}
+
+variable "aurora_secret_arn" {
+  description = "ARN du secret Aurora dans Secrets Manager"
+  type        = string
+}
+
+variable "task_role_arn" {
+  description = "ARN du rôle IAM pour la tâche ECS"
+  type        = string
+}
+
+variable "ecs_sg_id" {
+  description = "ID du groupe de sécurité à associer au service ECS"
+  type        = string
+}
+
+variable "private_subnets" {
+  description = "Liste des sous-réseaux privés pour ECS"
+  type        = list(string)
+}
+
+variable "target_group_arn" {
+  description = "ARN du target group à associer au service ECS"
+  type        = string
 }
 
 variable "execution_role_arn" {
@@ -15,49 +53,10 @@ variable "execution_role_arn" {
   type        = string
 }
 
-variable "task_role_arn" {
-  description = "ARN du rôle de tâche ECS (pour accès à d'autres services)"
-  type        = string
-}
-
-variable "image_url" {
-  description = "URL complète de l'image Docker (ECR ou Docker Hub)"
-  type        = string
-}
-
-variable "private_subnets" {
-  description = "Liste des sous-réseaux privés pour le service ECS"
-  type        = list(string)
-}
-
 variable "service_sg_id" {
-  description = "ID du security group associé au service ECS"
+  description = "ID du Security Group pour le service ECS"
   type        = string
 }
 
-variable "target_group_arn" {
-  description = "ARN du target group ALB vers lequel rediriger le trafic"
-  type        = string
-}
-
-variable "aurora_secret_arn" {
-  description = "ARN du secret stocké dans AWS Secrets Manager pour la base Aurora"
-  type        = string
-}
-
-variable "domain_name" {
-  type        = string
-  description = "Nom de domaine du projet (pour taggage)"
-}
-
-variable "default_tags" {
-  type        = map(string)
-  description = "Tags communs à appliquer"
-}
-
-variable "ecs_sg_id" {
-  description = "ID du SG utilisé pour ECS"
-  type        = string
-}
 
 

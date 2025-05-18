@@ -3,9 +3,10 @@ resource "aws_apigatewayv2_api" "websocket_api" {
   protocol_type               = "WEBSOCKET"
   route_selection_expression  = "$request.body.action"
 
-  tags = merge(var.tags, {
-    Name = var.domain_name
-  })
+  tags = merge(var.default_tags, {
+  Name = var.domain_name  
+})
+
 }
 resource "aws_apigatewayv2_integration" "websocket_integration" {
   api_id                 = aws_apigatewayv2_api.websocket_api.id
@@ -26,9 +27,10 @@ resource "aws_apigatewayv2_stage" "websocket_stage" {
   name        = "$default"
   auto_deploy = true
 
-  tags = merge(var.tags, {
-    Name = var.domain_name
-  })
+  tags = merge(var.default_tags, {
+  Name = var.domain_name
+})
+
 }
 
 resource "aws_apigatewayv2_domain_name" "websocket_domain" {
@@ -40,9 +42,10 @@ resource "aws_apigatewayv2_domain_name" "websocket_domain" {
     security_policy = "TLS_1_2"
   }
 
-  tags = merge(var.tags, {
-    Name = var.domain_name
-  })
+  tags = merge(var.default_tags, {
+  Name = var.domain_name
+})
+
 }
 
 resource "aws_apigatewayv2_api_mapping" "websocket_mapping" {

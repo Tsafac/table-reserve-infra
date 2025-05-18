@@ -1,11 +1,16 @@
+variable "project" {
+  description = "Nom du projet utilisé dans l'alias KMS"
+  type        = string
+}
 
 variable "domain_name" {
-  description = "Nom logique pour le tag Name"
+  description = "Nom de domaine utilisé pour tagger la ressource"
   type        = string
 }
 
 variable "default_tags" {
-  description = "Tags globaux à appliquer"
+  description = "Map de tags communs à toutes les ressources"
   type        = map(string)
 }
+
 

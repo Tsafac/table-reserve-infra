@@ -4,33 +4,33 @@ variable "project" {
 }
 
 variable "domain_name" {
-  description = "Nom logique pour les tags"
+  description = "Nom de domaine utilisé dans les tags"
   type        = string
 }
 
 variable "default_tags" {
-  description = "Tags globaux"
+  description = "Tags communs appliqués à toutes les ressources"
   type        = map(string)
 }
 
 variable "retention_in_days" {
-  description = "Durée de rétention des logs"
+  description = "Durée de rétention des logs CloudWatch (en jours)"
   type        = number
-  default     = 14
+  default     = 7
 }
 
 variable "aurora_cluster_id" {
-  description = "Nom du cluster Aurora"
+  description = "Identifiant du cluster Aurora (pour les alarmes RDS)"
   type        = string
 }
 
 variable "alb_metric_name" {
-  description = "Nom du LoadBalancer pour CloudWatch (ex: app/nom/uuid)"
+  description = "Nom du Load Balancer (dans les métriques ALB)"
   type        = string
 }
 
 variable "waf_metric_name" {
-  description = "Nom du WAF WebACL pour CloudWatch"
+  description = "Nom du WebACL utilisé par WAF"
   type        = string
 }
 

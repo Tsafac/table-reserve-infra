@@ -15,9 +15,10 @@ output "cognito_client_id" {
 }
 
 output "cognito_login_url" {
-  description = "URL de connexion Cognito"
+  description = "URL de login Cognito"
   value       = "https://${module.cognito.domain}.auth.${var.aws_region}.amazoncognito.com/login"
 }
+
 
 # === Backend / API ===
 output "ecs_fargate_service_name" {
@@ -71,4 +72,9 @@ output "alb_dns_name" {
 output "bastion_ip" {
   description = "Adresse IP publique de la Bastion"
   value       = module.bastion.bastion_public_ip
+}
+
+
+output "debug_alb_module" {
+  value = module.alb
 }

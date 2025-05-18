@@ -8,9 +8,9 @@ resource "aws_acm_certificate" "cloudfront_cert" {
     create_before_destroy = true
   }
 
-  tags = merge(var.tags, {
-    Name = var.domain_name
-  })
+  tags = merge(var.default_tags, {
+  Name = var.domain_name
+})
 }
 
 resource "aws_route53_record" "cloudfront_cert_validation" {
@@ -39,10 +39,10 @@ resource "aws_acm_certificate" "regional_cert" {
     create_before_destroy = true
   }
 
-  tags = {
-    Environment = var.environment
-    Project     = var.project
-  }
+   tags = merge(var.default_tags, {
+  Name = var.domain_name
+})
+
 }
 
 resource "aws_route53_record" "regional_cert_validation" {

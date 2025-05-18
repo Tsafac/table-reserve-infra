@@ -1,11 +1,9 @@
-output "ecr_repo_url" {
-  value = aws_ecr_repository.app.repository_url
-}
-
-output "ecr_repo_name" {
-  value = aws_ecr_repository.app.name
-}
-
 output "repository_url" {
-  value = aws_ecr_repository.this.repository_url
+  description = "URL du repository ECR"
+  value       = aws_ecr_repository.app.repository_url
+}
+
+output "repository_arn" {
+  description = "ARN du repository ECR"
+  value       = aws_ecr_repository.app.arn
 }

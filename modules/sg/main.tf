@@ -35,7 +35,7 @@ resource "aws_security_group" "bastion_sg" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = var.authorized_cidr
-    description = "SSH depuis IP autorisées"
+    description = "SSH access from allowed IPs"
   }
 
   egress {
@@ -72,6 +72,40 @@ resource "aws_security_group" "ecs_sg" {
 
   tags = merge(var.default_tags, {
     Name = "${var.domain_name}-ecs-sg"
+  })
+}
+
+# SG pour ALB
+resource "aws_security_group" "alb" {
+  name        = "${var.name_prefix}-alb-sg"
+  description = "SG pour ALB (HTTP/HTTPS depuis l’extérieur)"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP public"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS public"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.default_tags, {
+    Name = "${var.domain_name}-alb-sg"
   })
 }
 

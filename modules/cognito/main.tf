@@ -32,10 +32,6 @@ resource "aws_cognito_user_pool_client" "web_app" {
   supported_identity_providers = ["COGNITO"]
   callback_urls                = var.callback_urls
   logout_urls                  = var.logout_urls
-
-  tags = merge(var.default_tags, {
-    Name = "${var.domain_name}-client"
-  })
 }
 
 resource "aws_cognito_user_pool_domain" "main" {

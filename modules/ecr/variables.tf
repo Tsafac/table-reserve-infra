@@ -1,28 +1,18 @@
+variable "project" {
+  description = "Nom du projet"
+  type        = string
+}
 variable "ecr_repo_name" {
   description = "Nom du repository ECR"
   type        = string
 }
 
-variable "project" {
-  description = "Nom du projet"
-  type        = string
-  default     = "reservation-app"
-}
-
-variable "environment" {
-  description = "Environnement (dev, staging, prod)"
-  type        = string
-  default     = "production"
-}
-
 variable "domain_name" {
+  description = "Nom de domaine utilisé dans les tags"
   type        = string
-  description = "Nom de domaine principal"
 }
 
 variable "default_tags" {
+  description = "Map de tags communs à toutes les ressources"
   type        = map(string)
-  description = "Tags communs à toutes les ressources"
 }
-
-
