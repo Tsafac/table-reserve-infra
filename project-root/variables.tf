@@ -160,3 +160,9 @@ variable "execution_role_arn" {
   description = "ARN du rôle d'exécution ECS"
   type        = string
 }
+
+variable "kms_aurora_key_arn" {
+  description = "ARN of the KMS key used for Aurora encryption"
+  type        = string
+  default     = "" 
+}

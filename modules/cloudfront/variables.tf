@@ -33,5 +33,10 @@ variable "default_tags" {
   type        = map(string)
 }
 
+variable "name_prefix" {
+  description = "Préfixe pour nommer les ressources"
+  type        = string
+}
+
 
 

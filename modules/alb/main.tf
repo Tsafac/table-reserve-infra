@@ -1,9 +1,16 @@
+# tfsec:ignore:aws-elb-alb-not-public
+
+# Le load balancer doit être public pour servir l'application frontale via HTTPS.
+# Un WAF est appliqué pour protéger les requêtes, et seuls les ports 80/443 sont exposés.
+
 resource "aws_lb" "this" {
   name               = "${var.name_prefix}-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = var.security_group_ids
   subnets            = var.public_subnets
+  drop_invalid_header_fields = true
+
 
   tags = merge(var.default_tags, {
     Name = var.domain_name

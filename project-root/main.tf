@@ -1,3 +1,6 @@
+data "aws_caller_identity" "current" {}
+
+
 # 1. Réseaux
 module "vpc" {
   source             = "../modules/vpc"
@@ -10,6 +13,7 @@ module "vpc" {
   availability_zone  = var.availability_zone
   name_prefix        = var.name_prefix
   default_tags       = var.default_tags
+  vpc_flow_logs_role_arn = module.iam.vpc_flow_logs_role_arn
 }
 
 
@@ -52,6 +56,10 @@ module "iam" {
   domain_name   = var.domain_name
   default_tags  = var.default_tags
   aurora_secret_arn = module.aurora.aurora_secret_arn
+  account_id          = data.aws_caller_identity.current.account_id
+  region        = var.aws_region
+  kms_aurora_key_arn   = module.kms.kms_key_id
+  name_prefix          = var.name_prefix
 }
 
 module "kms" {
@@ -59,6 +67,8 @@ module "kms" {
   source        = "../modules/kms"
   domain_name   = var.domain_name
   default_tags  = var.default_tags
+  
+
 }
 
 module "security" {
@@ -160,6 +170,7 @@ module "s3" {
   name_prefix        = var.name_prefix
   oac_policy_json    = data.aws_iam_policy_document.oac_policy.json
   default_tags       = var.default_tags
+  kms_key_arn        = module.kms.frontend_key_arn
 }
 
 
@@ -182,7 +193,7 @@ module "cloudfront" {
   acm_cert_arn            = module.acm.cert_arn
   cloudfront_logs_bucket  = module.s3.logs_bucket_name
   cloudfront_domain_name  = "www.${var.domain_name}"
-
+  name_prefix             = var.name_prefix
   project                 = var.project
   default_tags            = var.default_tags
   domain_name             = var.domain_name  

@@ -13,4 +13,8 @@ variable "default_tags" {
   type        = map(string)
 }
 
+output "frontend_key_arn" {
+  description = "ARN de la clé KMS utilisée pour chiffrer le bucket frontend"
+  value       = aws_kms_key.frontend_key.arn
+}
 

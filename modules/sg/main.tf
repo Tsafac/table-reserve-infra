@@ -13,11 +13,13 @@ resource "aws_security_group" "aurora_sg" {
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["10.0.0.0/16"] # ou IP de destination spécifique
+  description = "Sortie HTTPS vers services internes"
+}
+
 
   tags = merge(var.default_tags, {
     Name = "${var.domain_name}-aurora-sg"
@@ -39,11 +41,13 @@ resource "aws_security_group" "bastion_sg" {
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["10.0.0.0/16"] # ou IP de destination spécifique
+  description = "Sortie HTTPS vers services internes"
+}
+
 
   tags = merge(var.default_tags, {
     Name = "${var.domain_name}-bastion-sg"
@@ -57,18 +61,30 @@ resource "aws_security_group" "ecs_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
+  from_port       = 80
+  to_port         = 80
+  protocol        = "tcp"
+  security_groups = [aws_security_group.alb.id]
+  description     = "HTTP depuis ALB uniquement"
+}
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+ingress {
+  from_port       = 443
+  to_port         = 443
+  protocol        = "tcp"
+  security_groups = [aws_security_group.alb.id]
+  description     = "HTTPS depuis ALB uniquement"
+}
+
+
+ egress {
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["10.0.0.0/16"] # ou IP de destination spécifique
+  description = "Sortie HTTPS vers services internes"
+}
+
 
   tags = merge(var.default_tags, {
     Name = "${var.domain_name}-ecs-sg"
@@ -85,24 +101,26 @@ resource "aws_security_group" "alb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "HTTP public"
+    cidr_blocks = var.authorized_cidr
+    description = "Acces HTTP depuis IP autorisees"
   }
 
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "HTTPS public"
+    cidr_blocks = var.authorized_cidr
+    description = "Acces HTTPS depuis IP autorisees"
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+ egress {
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["10.0.0.0/16"] # ou IP de destination spécifique
+  description = "Sortie HTTPS vers services internes"
+}
+
 
   tags = merge(var.default_tags, {
     Name = "${var.domain_name}-alb-sg"

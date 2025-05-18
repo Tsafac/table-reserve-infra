@@ -43,3 +43,7 @@ variable "default_tags" {
   type        = map(string)
 }
 
+variable "vpc_flow_logs_role_arn" {
+  description = "ARN du rôle IAM pour VPC Flow Logs"
+  type        = string
+}

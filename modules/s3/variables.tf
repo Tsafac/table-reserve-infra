@@ -13,3 +13,7 @@ variable "oac_policy_json" {
   type        = string
 }
 
+variable "kms_key_arn" {
+  description = "ARN de la clé KMS utilisée pour chiffrer le bucket frontend"
+  type        = string
+}

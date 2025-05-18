@@ -9,4 +9,15 @@ resource "aws_instance" "bastion" {
   tags = merge(var.default_tags, {
     Name = "${var.domain_name}-bastion"
   })
+  metadata_options {
+  http_endpoint = "enabled"
+  http_tokens   = "required"
+}
+
+root_block_device {
+  volume_type = "gp3" 
+  volume_size = 8      
+  encrypted   = true
+}
+
 }
