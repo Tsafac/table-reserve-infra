@@ -1,119 +1,126 @@
 # 📦 Projet Terraform – Infrastructure AWS pour Application de Réservation
 
+Bienvenue ! Ce dépôt contient le code Terraform permettant de déployer une infrastructure **cloud-native**, **scalable** et **sécurisée** sur AWS, destinée à héberger une application web de réservation de tables dans un restaurant. Le projet est modulaire, reproductible et conforme aux meilleures pratiques DevSecOps.
+
+---
+
 ## ✨ Objectif
-Ce projet met en place une infrastructure cloud complète et modulaire sur AWS pour une application de réservation. Elle est décrite à l'aide de Terraform, selon une architecture multi-AZ et conforme aux bonnes pratiques DevOps et sécurité.
+
+- Déployer une application web de réservation de tables avec frontend statique
+- Backend déployé sur ECS Fargate
+- Stockage des données via Aurora PostgreSQL
+- Authentification utilisateur avec Cognito
+- Sécurité, audit, supervision et chiffrement intégrés
+
+---
 
 ## 🗂️ Arborescence du projet
 
 ```
 TABLE-RESERVE-INFRA/
-├── modules/                        # Modules Terraform réutilisables
-│   ├── acm                         # Certificats ACM (frontend/backend)
-│   ├── alb                         # Load Balancer HTTP/HTTPS
-│   ├── aurora                      # Cluster RDS Aurora PostgreSQL
-│   ├── bastion                     # EC2 Bastion host pour accès SSH
+├── modules/
+│   ├── acm                         # Certificats SSL
+│   ├── alb                         # Application Load Balancer
+│   ├── aurora                      # Cluster Aurora PostgreSQL
+│   ├── bastion                     # Hôte Bastion EC2
 │   ├── cloudfront                  # CDN pour le frontend
-│   ├── cloudwatch                  # Logs ECS et métriques CloudWatch
-│   ├── cognito                     # Authentification utilisateur
-│   ├── ecr                         # Registry pour les images Docker
-│   ├── ecs-fargate                 # Déploiement backend via ECS Fargate
-│   ├── iam                         # Rôles IAM nécessaires
-│   ├── kms                         # Clés de chiffrement KMS
-│   ├── Route53                     # Enregistrements DNS
-│   ├── s3                          # Buckets S3 (frontend et logs)
-│   ├── security                    # CloudTrail, GuardDuty, Budget
-│   ├── sg                          # Security Groups (ECS, Bastion, ALB...)
-│   ├── vpc                         # Création des VPCs publics/privés
-│   ├── vpc-peering                 # Peering entre VPC 1 et VPC 2
-│   ├── waf                         # Web Application Firewall (CloudFront/ALB)
+│   ├── cloudwatch                  # Logs & monitoring
+│   ├── cognito                     # Authentification utilisateurs
+│   ├── ecr                         # Registre Docker
+│   ├── ecs-fargate                 # Services backend sur Fargate
+│   ├── iam                         # Rôles et politiques IAM
+│   ├── kms                         # Chiffrement avec KMS
+│   ├── Route53                     # DNS
+│   ├── s3                          # Buckets S3 (frontend & logs)
+│   ├── security                    # CloudTrail, GuardDuty, Budgets
+│   ├── sg                          # Groupes de sécurité
+│   ├── vpc                         # Réseaux VPC publics/privés
+│   ├── vpc-peering                 # Peering entre VPCs
+│   ├── waf                         # Web Application Firewall
 │   └── websocket                   # API Gateway WebSocket
 │
 ├── project-root/
-│   ├── main.tf                     # Composition globale (appel des modules)
-│   ├── variables.tf                # Déclaration des variables globales
-│   ├── outputs.tf                  # Valeurs exportées
-│   ├── provider.tf                 # Configuration AWS (multi-région)
-│   ├── terraform.tfvars            # Valeurs concrètes des variables
-│   ├── terraform.lock.hcl          # Lockfile provider
-│   └── README.md                   # Ce fichier
+│   ├── main.tf                     # Assemblage des modules
+│   ├── variables.tf                # Variables globales
+│   ├── outputs.tf                  # Outputs Terraform
+│   ├── provider.tf                 # Fournisseur AWS
+│   ├── terraform.tfvars            # Valeurs concrètes
+│   └── terraform.lock.hcl          # Lockfile
 ```
 
-## ☁️ Stack AWS utilisée
+---
 
-- **Amazon VPC** – Deux VPC interconnectés (peering)
-- **ALB** – Pour l'exposition du backend (HTTPS)
-- **Amazon ECS (Fargate)** – Déploiement du backend
-- **Amazon Aurora PostgreSQL** – Base de données managée
-- **Amazon Cognito** – Authentification des utilisateurs
-- **Amazon CloudFront + S3** – Distribution frontend statique
-- **Amazon WAF** – Sécurité applicative en couche 7
-- **API Gateway WebSocket** – Communication temps réel
-- **IAM, CloudWatch, GuardDuty, Budgets** – Sécurité et observabilité
+## ☁️ Services AWS utilisés
 
-## 🔐 Sécurité et bonnes pratiques
+- **VPC** (2 régions, peering)
+- **ALB** en HTTPS pour le backend
+- **ECS Fargate** pour les conteneurs applicatifs
+- **Aurora PostgreSQL** (multi-AZ)
+- **S3 + CloudFront** pour le frontend statique
+- **Cognito** pour la gestion des utilisateurs
+- **WAF**, **IAM**, **CloudWatch**, **GuardDuty**, **Budgets** pour la sécurité
+- **API Gateway WebSocket** pour le temps réel
 
-- 🔑 Gestion sécurisée des identifiants via **aws-vault**
-- 🔒 IAM : rôles les plus restrictifs possibles selon le principe de moindre privilège
-- 🔐 Buckets S3 chiffrés, bloqués en accès public, avec versioning et logs activés
-- 🧱 Architecture en **subnets privés et publics**
-- 📜 **CloudTrail** et **GuardDuty** activés pour l’audit et la détection d’anomalies
-- 📉 Budgets AWS configurés pour éviter les dérives de coûts
-- 🔐 KMS utilisé pour le chiffrement des logs, secrets et données sensibles
+---
 
-## ✅ État de la sécurité (`tfsec`)
+## 🔐 Sécurité & Bonnes pratiques
 
-Un scan a été effectué avec [`tfsec`](https://github.com/aquasecurity/tfsec).
+- Accès sécurisé via `aws-vault`
+- IAM en principe du moindre privilège
+- Chiffrement KMS des données sensibles
+- Journaux avec CloudTrail et alertes avec GuardDuty
+- Segmentation réseau avec subnets publics/privés
+- Gestion proactive des coûts via AWS Budgets
 
-### Résumé :
-- ✅ **0 findings critiques**
-- ⚠️ **1 finding HIGH (justifié)**
-- ⚠️ Quelques findings LOW/MEDIUM documentés
+---
 
-### Détails :
-| Niveau   | Description                                                                                 | Statut |
-|----------|----------------------------------------------------------------------------------------------|--------|
-| HIGH     | **ALB exposé publiquement** – Justifié car protégé par un **WAF** en amont                  | ✔️ OK |
-| MEDIUM   | **Absence de logs WebSocket** – Non bloquant pour un environnement de test                  | ✔️ OK |
-| LOW      | **Clés KMS gérées par AWS** – Pas bloquant, améliorable avec des CMK personnalisées         | ✔️ OK |
-| LOW      | **Performance Insights désactivé (Aurora)** – Activable si besoin en production              | ✔️ OK |
-| LOW      | **CloudWatch log group non chiffré avec CMK** – Peu critique pour environnement temporaire  | ✔️ OK |
+## ✅ Scan tfsec – Sécurité Infra
 
-## ⚠️ Problème volontaire sur Route53
+| Niveau   | Description                                                            | Statut |
+|----------|------------------------------------------------------------------------|--------|
+| HIGH     | ALB exposé (protégé par WAF)                                          | ✅ OK |
+| MEDIUM   | Absence logs WebSocket en test                                        | ✅ OK |
+| LOW      | Clés KMS gérées par AWS (CMK recommandé en prod)                      | ✅ OK |
+| LOW      | Performance Insights désactivé sur Aurora                             | ✅ OK |
+| LOW      | Logs CloudWatch non chiffrés avec CMK                                 | ✅ OK |
 
-Une erreur peut apparaître à l’exécution :
+---
 
-```
+## ⚠️ Problème Route53
+
+Erreur possible :
+```bash
 Error: no matching Route 53 Hosted Zone found
 ```
+**Solution** :
+- Créer manuellement la zone DNS via la console AWS
+- Ou commenter le module `route53` dans `main.tf`
 
-🎯 **Explication** :  
-Le module `Route53` recherche une zone DNS (`data "aws_route53_zone"`) qui **n’a pas été créée dans AWS**.
+---
 
-🛠️ **Solution** :
-- Crée manuellement la zone DNS sur AWS (recommandé)
-- Ou commente temporairement le module `route53` dans `main.tf` pour bypasser ce check
-
-## 🚀 Déploiement local (via aws-vault)
+## 🚀 Déploiement local avec aws-vault
 
 ```bash
-# Initialisation du projet
 aws-vault exec unify -- terraform init
-
-# Validation de la syntaxe Terraform
 aws-vault exec unify -- terraform validate
-
-# Planification des changements
 aws-vault exec unify -- terraform plan -out=tfplan
 ```
 
-## 🧠 Notes supplémentaires
+---
 
-- ✅ Toutes les ressources critiques sont **versionnées**, **chiffrées**, et **monitorées**
-- 📦 L’infrastructure est **100% modulaire** (reutilisable sur d'autres projets)
-- 📊 Préparation à l’usage en **environnement de production** avec quelques ajustements mineurs
+## 🔁 Intégration CI/CD GitLab
+
+Le pipeline CI/CD inclut :
+
+- `tfsec` pour la sécurité Terraform
+- `tflint` pour les bonnes pratiques
+- `snyk`, `trivy` pour la sécurité des conteneurs
+- Étapes de `plan` et `apply` avec approbation manuelle
+
+---
 
 ## 📝 Auteur
 
 **Fabrice TSAFACK**  
-DevSecOps | Cloud | Sécurité | Terraform | Kubernetes  
-📧 `ronicefabrice@gmail.com`
+DevSecOps | Cloud | Terraform | Kubernetes  
+📧 ronicefabrice@gmail.com
